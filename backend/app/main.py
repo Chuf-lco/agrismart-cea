@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 import app.models #noqa: F401  -registers all models with SQLAlchemy
+from app.routers import crops, sensors, cycles
 
 app = FastAPI(
     title="AgriSmart CEA",
@@ -16,6 +17,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(crops.router)
+app.include_router(sensors.router)
+app.include_router(cycles.router)
 
 
 @app.get("/")
