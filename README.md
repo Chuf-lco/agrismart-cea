@@ -25,25 +25,63 @@ Small and mid-scale greenhouse operators across East Africa lack affordable tool
 ## Getting Started
 
 ```bash
-# 1. Clone the repo
+# Clone the repo
 git clone https://github.com/Chuf-lco/agrismart-cea.git
 cd agrismart-cea/backend
 
-# 2. Create and activate virtual environment
+# Create and activate virtual environment
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# 3. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 4. Set up environment variables
+# Set up environment variables
 cp .env.example .env
 
-# 5. Run the server
+# Run migrations and seed the crops
+alembic upgrade head
+python seed.py
+
+#  Run the server
 uvicorn app.main:app --reload
 ```
 
 Visit `http://localhost:8000/docs` to explore the API.
+
+# Frontend
+
+```bash
+cd ../frontend
+npm install
+npm run dev
+```
+
+App available at `http://localhost:5173`
+
+# API Endpoints
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET/POST | `/crops` | List or create crops |
+| GET/PATCH/DELETE | `/crops/{id}` | Manage a single crop |
+| GET/POST | `/sensors/readings` | Log or retrieve sensor readings |
+| GET | `/sensors/readings/latest` | Latest reading for a greenhouse |
+| GET/POST | `/cycles` | List or start crop cycles |
+| GET/PATCH | `/cycles/{id}` | Manage a single cycle |
+
+# Seeded Crops
+
+5 climate-resilient East African crops are pre-loaded:
+
+| Crop | Resilience | Water | Growth |
+|---|---|---|---|
+| Amaranth | 9/10 | Low | 30 days |
+| African Nightshade | 8/10 | Medium | 45 days |
+| Cowpea | 9/10 | Low | 60 days |
+| Spider Plant | 8/10 | Low | 35 days |
+| Tomato (Roma VF) | 7/10 | Medium | 75 days |
+
 
 ## Project Roadmap
 
@@ -53,7 +91,3 @@ Visit `http://localhost:8000/docs` to explore the API.
 | W2 | Sensor dashboard UI, crop cycle tracker frontend |
 | W3 | AI crop advisor (Claude API integration) |
 | W4 | Polish, deploy, seed with real African crop data |
-
-## Dev Log
-
-- [Week 1 — Why I'm building a CEA tool for African farmers](#) *(coming soon)*
