@@ -11,7 +11,7 @@ Small and mid-scale greenhouse operators across East Africa lack affordable tool
 - **Crop Management** — track climate-resilient crop varieties and their optimal growing conditions
 - **Sensor Logging** — log and visualize greenhouse sensor readings (temp, humidity, CO₂, light, soil moisture)
 - **Cycle Tracking** — manage crop cycles from planting to harvest
-- **AI Crop Advisor** *(Week 3)* — describe a problem, get intelligent recommendations powered by Claude AI
+- **AI Crop Advisor** — describe a problem, get intelligent recommendations powered by Claude AI
 
 ## Tech Stack
 
@@ -85,9 +85,9 @@ App available at `http://localhost:5173`
 
 ## Project Roadmap
 
-| Week | Focus |
+| Focus |
 |---|---|
-| W1 ✅ | Project setup, data models, CRUD API |
-| W2 | Sensor dashboard UI, crop cycle tracker frontend |
-| W3 | AI crop advisor (Claude API integration) |
-| W4 | Polish, deploy, seed with real African crop data |
+ ✅ | Project setup, data models, CRUD API |
+|✅ | Sensor dashboard UI, crop cycle tracker frontend |
+| AI crop advisor (Claude API integration) |
+| Polish, deploy, seed with real African crop data |
