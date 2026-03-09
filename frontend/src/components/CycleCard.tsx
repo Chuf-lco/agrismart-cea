@@ -1,5 +1,7 @@
+import { useState } from "react"
 import { differenceInDays, parseISO } from "date-fns"
 import { updateCycle } from "../api"
+import CycleTimeline from "./CycleTimeline"
 
 interface Crop { id: number; name: string; variety?: string }
 
@@ -28,6 +30,23 @@ const statusStyles = {
 }
 
 export default function CycleCard({ cycle, onUpdate, onClick }: Props) {
+  const [expanded, setExpanded] = useState(false)
+  const [notes, setNotes] = useState(cycle.notes ?? "")
+  const [savingNotes, setSavingNotes] = useState(false)
+
+  const handleSaveNotes = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSavingNotes(true)
+    await updateCycle(cycle.id, { notes })
+    setSavingNotes(false)
+    onUpdate()
+  }
+
+  const handleClick = () => {
+    setExpanded(x => !x)
+    onClick()
+  }
+
   const start = parseISO(cycle.start_date)
   const today = new Date()
   const elapsed = differenceInDays(today, start)
@@ -56,7 +75,7 @@ export default function CycleCard({ cycle, onUpdate, onClick }: Props) {
 
   return (
     <div
-      onClick={onClick}
+      onClick={handleClick}
       className="bg-gray-900 border border-gray-800 rounded-xl p-5 cursor-pointer hover:border-gray-600 transition-colors"
     >
       {/* Header */}
@@ -116,6 +135,49 @@ export default function CycleCard({ cycle, onUpdate, onClick }: Props) {
           </button>
         </div>
       )}
+
+      {/* Expanded detail */}
+      {expanded && (
+        <div onClick={e => e.stopPropagation()}>
+          <CycleTimeline cycle={cycle} />
+
+          {/* Crop detail */}
+          {cycle.crop && (
+            <div className="mt-4 pt-4 border-t border-gray-800">
+              <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">Crop Info</p>
+              <div className="grid grid-cols-2 gap-2 text-sm text-gray-400">
+                {cycle.crop.variety && <p>🌿 {cycle.crop.variety}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Notes */}
+          <div className="mt-4 pt-4 border-t border-gray-800">
+            <p className="text-xs text-gray-500 mb-2 uppercase tracking-wide">Notes</p>
+            <textarea
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              rows={2}
+              placeholder="Add notes about this cycle..."
+              className="w-full bg-gray-800 border border-gray-700 text-gray-200 text-sm rounded-lg px-3 py-2 focus:outline-none focus:border-green-600 resize-none"
+            />
+            <button
+              onClick={handleSaveNotes}
+              disabled={savingNotes}
+              className="mt-2 text-xs px-3 py-1.5 rounded-lg bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors disabled:opacity-50"
+            >
+              {savingNotes ? "Saving..." : "Save Notes"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Expand hint */}
+      <div className="mt-3 text-center">
+        <span className="text-xs text-gray-600">
+          {expanded ? "▲ collapse" : "▼ expand"}
+        </span>
+      </div>
     </div>
   )
 }
