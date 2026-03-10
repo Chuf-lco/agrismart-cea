@@ -2,13 +2,15 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import Base, engine
 import app.models #noqa: F401  -registers all models with SQLAlchemy
-from app.routers import crops, sensors, cycles
+from app.routers import crops, sensors, cycles, advisor
 
 app = FastAPI(
     title="AgriSmart CEA",
     description="Controlled Environment Agriculture platform for African greenhouse operators.",
     version="0.1.0",
 )
+# Create tables (dev only - use Alembic migrations in production)
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,6 +23,7 @@ app.add_middleware(
 app.include_router(crops.router)
 app.include_router(sensors.router)
 app.include_router(cycles.router)
+app.include_router(advisor.router)
 
 
 @app.get("/")
