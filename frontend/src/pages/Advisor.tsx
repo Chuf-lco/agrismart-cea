@@ -58,9 +58,14 @@ export default function Advisor() {
       })
       setHistory([...newHistory, { role: "assistant", content: res.response }])
       setContextUsed(res.context_used)
-    } catch {
-      setError("Failed to reach the advisor. Is the backend running?")
-      // Remove the user message if request failed
+    } catch (err: any) {
+      const msg = err?.response?.status === 502
+        ? "The AI service is temporarily unavailable. Please try again."
+        : err?.response?.status === 500
+        ? "API key not configured — check your backend .env file."
+        : "Failed to reach the advisor. Is the backend running?"
+      setError(msg)
+      // Remove the optimistic user message
       setHistory(history)
     } finally {
       setLoading(false)
@@ -81,6 +86,17 @@ export default function Advisor() {
   }
 
   const selectedCrop = crops.find(c => c.id === cropId)
+
+  // Guard — no crops in DB
+  if (!crops.length) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="text-center">
+        <p className="text-4xl mb-3">🌿</p>
+        <p className="text-white font-medium mb-1">No crops found</p>
+        <p className="text-gray-500 text-sm">Add crops to the database before using the advisor.</p>
+      </div>
+    </div>
+  )
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] md:h-screen max-h-screen">
@@ -121,7 +137,7 @@ export default function Advisor() {
           </select>
         </div>
 
-        {/* Context panel */}
+{/* Context panel — richer display*/}
         {contextUsed && (
           <div className="mt-3">
             <button
@@ -131,13 +147,47 @@ export default function Advisor() {
               {contextOpen ? "▲" : "▼"} What context is the advisor using?
             </button>
             {contextOpen && (
-              <div className="mt-2 bg-gray-900 border border-gray-800 rounded-xl p-3 grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
-                <div><p className="text-gray-500">Crop</p><p className="text-white">{contextUsed.crop}</p></div>
-                <div><p className="text-gray-500">Greenhouse</p><p className="text-white">{contextUsed.greenhouse_id}</p></div>
-                <div><p className="text-gray-500">Temperature</p><p className="text-white">{contextUsed.temperature ?? "N/A"}°C</p></div>
-                <div><p className="text-gray-500">Humidity</p><p className="text-white">{contextUsed.humidity ?? "N/A"}%</p></div>
-                <div><p className="text-gray-500">CO₂</p><p className="text-white">{contextUsed.co2_ppm ?? "N/A"} ppm</p></div>
-                <div><p className="text-gray-500">Active cycle</p><p className="text-white">{contextUsed.has_active_cycle ? `Day ${contextUsed.cycle_day}` : "None"}</p></div>
+              <div className="mt-2 bg-gray-900 border border-gray-800 rounded-xl p-3 text-xs space-y-3">
+                {/* Crop + greenhouse */}
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="text-gray-500 mb-0.5">Crop</p>
+                    <p className="text-white font-medium">{contextUsed.crop}</p>
+                    <p className="text-gray-500">{contextUsed.variety}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500 mb-0.5">Greenhouse</p>
+                    <p className="text-white font-medium">{contextUsed.greenhouse_id}</p>
+                    <p className="text-gray-500">
+                      {contextUsed.has_active_cycle
+                        ? `Active cycle · Day ${contextUsed.cycle_day}`
+                        : "No active cycle"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Sensor readings */}
+                <div>
+                  <p className="text-gray-500 mb-1.5">Sensor readings used</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "Temp", value: contextUsed.temperature, unit: "°C" },
+                      { label: "Humidity", value: contextUsed.humidity, unit: "%" },
+                      { label: "CO₂", value: contextUsed.co2_ppm, unit: "ppm" },
+                    ].map(({ label, value, unit }) => (
+                      <div key={label} className="bg-gray-800 rounded-lg p-2 text-center">
+                        <p className="text-gray-400">{label}</p>
+                        <p className="text-white font-medium">
+                          {value != null ? `${value}${unit}` : "N/A"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-gray-600 italic">
+                  This data was injected into the AI's context before generating the response above.
+                </p>
               </div>
             )}
           </div>
