@@ -4,7 +4,7 @@
 
 ## The Problem
 
-Small and mid-scale greenhouse operators across East Africa lack affordable tools to monitor crops, track growth cycles, and get agronomic advice. Most rely on WhatsApp groups, paper logs, and expensive consultants. AgriSmart changes that.
+Small and mid-scale greenhouse farmers across East Africa lack affordable tools to monitor crops, track growth cycles, and get agronomic advice. Most rely on WhatsApp groups, paper logs, and expensive consultants. AgriSmart changes that.
 
 ## What It Does
 
@@ -20,7 +20,7 @@ Small and mid-scale greenhouse operators across East Africa lack affordable tool
 | Backend | Python, FastAPI, SQLAlchemy, Alembic |
 | Frontend | TypeScript, React, Vite, Tailwind CSS |
 | Database | SQLite (dev) / PostgreSQL (prod) |
-| AI | Anthropic Claude API |
+| AI | Groq API · Llama 3.3 70B  |
 
 ## Getting Started
 
@@ -89,5 +89,5 @@ App available at `http://localhost:5173`
 |---|---|
  ✅ | Project setup, data models, CRUD API |
 |✅ | Sensor dashboard UI, crop cycle tracker frontend |
-| AI crop advisor (Claude API integration) |
+|✅ | AI crop advisor (Groq + Llama 3, context injection, chat UI) |
 | Polish, deploy, seed with real African crop data |
