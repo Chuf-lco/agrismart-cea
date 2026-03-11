@@ -3,11 +3,13 @@ import { Routes, Route, NavLink } from "react-router-dom"
 import Dashboard from "./pages/Dashboard"
 import Crops from "./pages/Crops"
 import Cycles from "./pages/Cycles"
+import Advisor from "./pages/Advisor"
 
 const nav = [
   { to: "/", label: "Dashboard" },
   { to: "/crops", label: "Crops" },
   { to: "/cycles", label: "Cycles" },
+  { to: "/advisor", label: "Advisor" },
 ]
 
 export default function App() {
@@ -74,6 +76,7 @@ export default function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/crops" element={<Crops />} />
           <Route path="/cycles" element={<Cycles />} />
+          <Route path="/advisor" element={<Advisor />} />
         </Routes>
       </main>
     </div>

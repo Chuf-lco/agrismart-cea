@@ -28,7 +28,21 @@ export const getLatestReading = (greenhouse_id: string) =>
 export const logSensorReading = (data: SensorPayload) =>
   http.post("/sensors/readings", data).then(r => r.data)
 
-// ── Crop Cycles ───────────────────────────────
+// ── AI Advisor ────────────────────────────────
+export interface AdvisorMessage {
+  role: "user" | "assistant"
+  content: string
+}
+
+export interface AdvisorPayload {
+  greenhouse_id: string
+  crop_id: number
+  message: string
+  history: AdvisorMessage[]
+}
+
+export const postAdvisorMessage = (data: AdvisorPayload) =>
+  http.post("/advisor/ask", data).then(r => r.data)
 export interface CyclePayload {
   greenhouse_id: string
   crop_id: number
