@@ -1,57 +1,53 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from groq import Groq
+# advisor.py — auth on POST /advisor/ask
+from fastapi import APIRouter, Depends
+from app.auth import get_current_user
+from pydantic import BaseModel
+from typing import List
 import os
-
-from app.database import get_db
-from app.schemas.advisor import AdvisorRequest, AdvisorResponse
-from app.utils.context_fetcher import get_advisor_context
-from app.utils.prompt_builder import build_system_prompt
+import httpx
 
 router = APIRouter(prefix="/advisor", tags=["AI Advisor"])
 
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+GROQ_URL = "https://api.groq.com/openai/v1/chat/completions"
+MODEL = "llama3-8b-8192"
 
-@router.post("/ask", response_model=AdvisorResponse)
-def ask_advisor(payload: AdvisorRequest, db: Session = Depends(get_db)):
-    api_key = os.getenv("GROQ_API_KEY")
-    if not api_key:
-        raise HTTPException(status_code=500, detail="GROQ_API_KEY not configured")
+SYSTEM_PROMPT = """You are AgriSmart, an AI advisor for controlled environment agriculture (CEA) 
+in Africa. You help greenhouse operators in Kenya, Ethiopia, Nigeria, and other African countries 
+optimize their crops. Be concise, practical, and use metric units. Focus on actionable advice."""
 
-    # Fetch context
-    ctx = get_advisor_context(payload.greenhouse_id, payload.crop_id, db)
-    crop, reading, cycle = ctx["crop"], ctx["reading"], ctx["cycle"]
-    system_prompt = build_system_prompt(crop, reading, cycle)
 
-    # Build messages
-    messages = [{"role": m.role, "content": m.content} for m in payload.history]
+class AdvisorMessage(BaseModel):
+    role: str
+    content: str
+
+
+class AdvisorPayload(BaseModel):
+    greenhouse_id: str
+    crop_id: int
+    message: str
+    history: List[AdvisorMessage] = []
+
+
+@router.post("/ask")
+async def ask_advisor(
+    payload: AdvisorPayload,
+    _user: str = Depends(get_current_user),   # 🔒 auth required
+):
+    messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    for msg in payload.history[-6:]:  # keep last 6 turns for context
+        messages.append({"role": msg.role, "content": msg.content})
     messages.append({"role": "user", "content": payload.message})
 
-    # Call Groq
-    try:
-        client = Groq(api_key=api_key)
-        completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "system", "content": system_prompt}] + messages,
-            max_tokens=1024,
-            temperature=0.7,
+    async with httpx.AsyncClient() as client:
+        response = await client.post(
+            GROQ_URL,
+            headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+            json={"model": MODEL, "messages": messages, "max_tokens": 512},
+            timeout=30,
         )
-        response_text = completion.choices[0].message.content
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Groq API error: {str(e)}")
+        response.raise_for_status()
+        data = response.json()
 
-    # Context summary for frontend panel
-    context_used = {
-        "crop": crop.name,
-        "variety": crop.variety,
-        "greenhouse_id": payload.greenhouse_id,
-        "temperature": reading.temperature if reading else None,
-        "humidity": reading.humidity if reading else None,
-        "co2_ppm": reading.co2_ppm if reading else None,
-        "has_active_cycle": cycle is not None,
-        "cycle_day": (
-            (__import__("datetime").date.today() - cycle.start_date).days
-            if cycle else None
-        ),
-    }
-
-    return AdvisorResponse(response=response_text, context_used=context_used)
+    reply = data["choices"][0]["message"]["content"]
+    return {"reply": reply, "greenhouse_id": payload.greenhouse_id}
