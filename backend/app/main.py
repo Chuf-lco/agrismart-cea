@@ -24,6 +24,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+)
+
 
 app.include_router(crops.router)
 app.include_router(sensors.router)
