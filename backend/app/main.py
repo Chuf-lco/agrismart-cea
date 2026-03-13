@@ -14,16 +14,15 @@ app = FastAPI(
 # Create tables (dev only - use Alembic migrations in production)
 Base.metadata.create_all(bind=engine)
 
+
+allow_origins=["http://localhost:5173","http://localhost:4173",os.getenv("FRONTEND_URL", ""),]
+
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173","http://localhost:4173",os.getenv("FRONTEND_URL", "")]
-    app.add_middleware(
         CORSMiddleware,
-        allow_origins=[o for o in ALLOWED_ORIGINS if o],  # Vite dev server
+        allow_origins=[o for o in allow_origins if o],  # Vite dev server
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
 )
 
 
