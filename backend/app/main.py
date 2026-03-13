@@ -10,6 +10,7 @@ app = FastAPI(
     title="AgriSmart CEA",
     description="Controlled Environment Agriculture platform for African greenhouse operators.",
     version="0.1.0",
+    redirect_slashes=False,
 )
 # Create tables (dev only - use Alembic migrations in production)
 Base.metadata.create_all(bind=engine)
