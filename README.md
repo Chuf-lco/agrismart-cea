@@ -21,6 +21,7 @@ Small and mid-scale greenhouse farmers across East Africa lack affordable tools 
 | Frontend | TypeScript, React, Vite, Tailwind CSS |
 | Database | SQLite (dev) / PostgreSQL (prod) |
 | AI | Groq API · Llama 3.3 70B  |
+| Hosting | Railway (backend) - Vercel (frontend)
 
 ## Getting Started
 
@@ -54,10 +55,33 @@ Visit `http://localhost:8000/docs` to explore the API.
 ```bash
 cd ../frontend
 npm install
+
+cp .env.example .env.local
+# Set VITE_API_URL=http://localhost:8000
+# Set VITE_OPERATOR_PASSWORD=your_operator_password
+
 npm run dev
+
+App available at http://localhost:5173
+
+# Deployment
+Backend → Railway
+
+Create a Railway project and add a PostgreSQL plugin
+Connect your GitHub repo, set root directory to backend/
+Add environment variables: DATABASE_URL, GROQ_API_KEY, ADMIN_PASSWORD, OPERATOR_PASSWORD, APP_ENV=production, FRONTEND_URL
+Deploy — Railway auto-runs alembic upgrade head && python seed.py via Procfile
+
+Frontend → Vercel
+
+cd frontend
+vercel --prod
+
+Add env vars in Vercel dashboard: VITE_API_URL, VITE_OPERATOR_PASSWORD
+vercel --prod
 ```
 
-App available at `http://localhost:5173`
+
 
 # API Endpoints
 
@@ -68,7 +92,8 @@ App available at `http://localhost:5173`
 | GET/POST | `/sensors/readings` | Log or retrieve sensor readings |
 | GET | `/sensors/readings/latest` | Latest reading for a greenhouse |
 | GET/POST | `/cycles` | List or start crop cycles |
-| GET/PATCH | `/cycles/{id}` | Manage a single cycle |
+ GET/PATCH | `/cycles/{id}` | Manage a single cycle |
+POST | `/advisor/ask` | Ask the AI advisor |
 
 # Seeded Crops
 
@@ -90,4 +115,4 @@ App available at `http://localhost:5173`
  ✅ | Project setup, data models, CRUD API |
 |✅ | Sensor dashboard UI, crop cycle tracker frontend |
 |✅ | AI crop advisor (Groq + Llama 3, context injection, chat UI) |
-| Polish, deploy, seed with real African crop data |
+|✅ | Polish, deploy, seed with real African crop data |

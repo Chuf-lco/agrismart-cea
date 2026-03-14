@@ -19,7 +19,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-950 text-gray-100 font-sans">
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-4 py-3">
-        <span className="text-green-400 font-bold">🌱 AgriSmart</span>
+        <span className="text-green-400 font-bold">🌱 AgriSmart </span>
         <button onClick={() => setOpen(o => !o)} className="text-gray-400 hover:text-white text-xl">
           {open ? "✕" : "☰"}
         </button>
@@ -72,6 +72,14 @@ export default function App() {
 
       {/* Main content */}
       <main className="md:ml-56 pt-16 md:pt-0 p-6 md:p-8">
+        {/* Demo banner */}
+        <div className="mb-6 bg-green-950 border border-green-800 rounded-xl px-4 py-2.5 flex items-center gap-2 text-sm text-green-300">
+          <span>🌱</span>
+          <span>
+            <span className="font-medium">AgriSmart Demo</span>
+            <span className="text-green-500"> — Nairobi, Kenya · GH-001 active · Amaranth Day 8/30</span>
+          </span>
+        </div>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/crops" element={<Crops />} />
