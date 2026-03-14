@@ -30,6 +30,7 @@ class AdvisorPayload(BaseModel):
 
 
 @router.post("/ask")
+@router.post("/ask/")
 async def ask_advisor(
     payload: AdvisorPayload,
     _user: str = Depends(get_current_user),   # 🔒 auth required
