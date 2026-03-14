@@ -1,4 +1,3 @@
-# cycles.py — auth on POST and PATCH
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -10,8 +9,6 @@ from datetime import date
 
 router = APIRouter(prefix="/cycles", tags=["Crop Cycles"])
 
-
-# ── Schemas ────────────────────────────────────────────────────────────────────
 
 class CycleCreate(BaseModel):
     greenhouse_id: str
@@ -27,8 +24,7 @@ class CycleUpdate(BaseModel):
     notes: Optional[str] = None
 
 
-# ── Endpoints ──────────────────────────────────────────────────────────────────
-
+@router.get("")
 @router.get("/")
 def list_cycles(
     greenhouse_id: Optional[str] = None,
@@ -51,11 +47,12 @@ def get_cycle(cycle_id: int, db: Session = Depends(get_db)):
     return cycle
 
 
+@router.post("")
 @router.post("/", status_code=201)
 def start_cycle(
     payload: CycleCreate,
     db: Session = Depends(get_db),
-    _user: str = Depends(get_current_user),   # 🔒 auth required
+    _user: str = Depends(get_current_user),
 ):
     cycle = models.CropCycle(**payload.dict())
     db.add(cycle)
@@ -69,7 +66,7 @@ def update_cycle(
     cycle_id: int,
     payload: CycleUpdate,
     db: Session = Depends(get_db),
-    _user: str = Depends(get_current_user),   # 🔒 auth required
+    _user: str = Depends(get_current_user),
 ):
     cycle = db.query(models.CropCycle).filter(models.CropCycle.id == cycle_id).first()
     if not cycle:

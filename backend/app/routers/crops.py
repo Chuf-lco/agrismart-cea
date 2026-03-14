@@ -1,8 +1,3 @@
-# crops.py — add auth to write endpoints
-# Replace your existing crops router with this file.
-# GET endpoints remain open (read-only for demo).
-# POST / PATCH / DELETE require Basic auth.
-
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
@@ -13,8 +8,6 @@ from typing import Optional
 
 router = APIRouter(prefix="/crops", tags=["Crops"])
 
-
-# ── Schemas ────────────────────────────────────────────────────────────────────
 
 class CropCreate(BaseModel):
     name: str
@@ -42,8 +35,7 @@ class CropUpdate(BaseModel):
     notes: Optional[str] = None
 
 
-# ── Endpoints ──────────────────────────────────────────────────────────────────
-
+@router.get("")
 @router.get("/")
 def list_crops(db: Session = Depends(get_db)):
     return db.query(models.Crop).all()
@@ -57,11 +49,12 @@ def get_crop(crop_id: int, db: Session = Depends(get_db)):
     return crop
 
 
+@router.post("")
 @router.post("/", status_code=201)
 def create_crop(
     payload: CropCreate,
     db: Session = Depends(get_db),
-    _user: str = Depends(get_current_user),   # 🔒 auth required
+    _user: str = Depends(get_current_user),
 ):
     crop = models.Crop(**payload.dict())
     db.add(crop)
@@ -75,7 +68,7 @@ def update_crop(
     crop_id: int,
     payload: CropUpdate,
     db: Session = Depends(get_db),
-    _user: str = Depends(get_current_user),   # 🔒 auth required
+    _user: str = Depends(get_current_user),
 ):
     crop = db.query(models.Crop).filter(models.Crop.id == crop_id).first()
     if not crop:
@@ -91,7 +84,7 @@ def update_crop(
 def delete_crop(
     crop_id: int,
     db: Session = Depends(get_db),
-    _user: str = Depends(get_current_user),   # 🔒 auth required
+    _user: str = Depends(get_current_user),
 ):
     crop = db.query(models.Crop).filter(models.Crop.id == crop_id).first()
     if not crop:
